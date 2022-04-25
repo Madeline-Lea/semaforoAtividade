@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <!--Configuração padrão do HTML5-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atividade Semaforo</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!--Body aonde contém o esqueleto do fárol.-->
+    <!--div container - o farol em si-->
+    <div id="container">
+        <div class="status cor" id="vermelho"></div>
+        <div class="status cor" id="amarelo"></div>
+        <div class="status cor" id="verde"></div>
+    </div>
+    <!-- Fim do container-->
+
+    <!--Os botões de eventos
+    O semVerde inicia o semáforo fazendo com que ele execute nos tempos determinados.
+    O semManutenção inicia o evento de que o tal semáforo está em manutenção e precisa 
+    de um reparo o mais rápido possível.
+    O semPedestre inicia o evento aonde o pedestre pode passar para atravessar, 
+    mas só poderá atravessar depois que o semaforo tiver completado um ciclo.
+
+
+    -->
+    <button onclick="semaforo.botão()">Inicio</button>
+    <button onclick="semaforo.semManutencao()" id="manutencao">Manutenção</button>
+    <button onclick="semaforo.semPedestre()" id="pedestre">Pedestre</button>
+ 
+    <script type="application/javascript">
+
+
+        // Declarações das variáveis 
+
+        //Manipulação do DOM, para fazer ás funções funcionarem trocando e adicionando classes.
+         const red =    document.getElementById('vermelho');
+         const green =  document.getElementById('verde');
+         const yellow = document.getElementById('amarelo');
+         const man_btn = document.getElementById('manutencao');
+         const ped_btn = document.getElementById('pedestre');
+
+
+         
+         // Declaração de uma variável-objeto 
+
+         /* Essas variável-objeto contém consigo um 
+         contador, um intervalo e uma bandeira.
+
+         O contador é utilzado para ser o temporizador do semáforo.
+         O intervalo serve para limpar os temporizadores existentes no código.
+         A bandeira para ligar e desligar as funções.*/
+        var semaforo = {
+            contador: 0,
+            intervalId: undefined,
+            flag: false,
+            qntDeCiclos: 0,
+
+            // semVerde é a função que inicia o evento do semáforo fazendo as callbacks
+            // das próximas funções que farão de fato as cores mudar
+            // de Verde pra amarelo e vermelho pra verde. (essas funções de callbacks fazem a
+            // coisa da semVerde).  
+            semVerde: () => {
+                 //Configuração do semáforo.
+                console.log('%centrou no verde', 'color: green;');
+                red.classList.remove('vermelhoAll');     
+                green.classList.add('verdeAll');
+                
+                this.intervalId  = setInterval(() => {
+                    
+                    green.innerText = semaforo.contador;
+                    semaforo.contador++;
+                    console.log(`%c${semaforo.contador}`, 'color: green;');
+                    
+                    if(semaforo.contador > 19){
+
+                        clearInterval(this.intervalId);
+                        semaforo.contador = 0;
+                        green.innerText = "";
+                        console.log('%cchamando o amarelo', 'color: yellow;');
+                        semaforo.semAmarelo();
+                    }
+                }, 1000);
+    
+            },
+
+            semAmarelo: () => {
+                //Configuração
+                console.log('%centrou no amarelo', 'color: yellow');
+                green.classList.remove('verdeAll');
+                yellow.classList.add('amareloAll');
+                semaforo.contador = 0;
+
+                this.intervalId  = setInterval(() => {
+                    
+                    console.log(`%c${semaforo.contador}`, 'color: yellow;');
+                    semaforo.contador++;
+                    yellow.innerText = semaforo.contador;
+                    if(semaforo.contador > 4){
+                        
+                        clearInterval(this.intervalId);
+                        yellow.innerText = ""
+                        semaforo.contador = 0;
+                        console.log('%cchamando o vermelho', 'color: red;');
+                        semaforo.semVermelho();
+                    } 
+                }, 1000);
+                
+            },
+            
+            
+            semVermelho: () => {
+                 //Configuração
+                console.log('%centrou no vermelho', 'color: red;');
+                yellow.classList.remove('amareloAll');
+                red.classList.add('vermelhoAll');
+                semaforo.contador = 0;
+                
+                this.intervalId  = setInterval(() => {
+                    red.innerText = semaforo.contador;
+                    console.log(`%c${semaforo.contador}`, 'color: red;');
+                    semaforo.contador++;
+                    
+                    if(semaforo.contador > 10){
+                        red.innerText = "";
+                        clearInterval(this.intervalId);
+                        semaforo.semVerde();
+                        semaforo.contador = 0;
+                    } 
+                    
+                }, 1000);
+                
+            },
+            // A função semManutenção é aonde o semaforo começa a piscar
+            semManutencao(){
+                
+
+                setInterval(function() {
+                    yellow.classList.add('amareloAll');
+                    yellow.style.visibility = (yellow.style.visibility == 'hidden' ? '' : 'hidden');
+                    yellow.classList.add('status')
+                }, 500 );
+                
+            },
+
+            botão(){
+                if(!semaforo.flag){
+                    semaforo.flag = true;
+                    semaforo.semVerde();
+                } else {
+                    clearInterval(this.intervalId);
+                    semaforo.flag = true;                }
+            },
+
+            semPedestre(){
+                semaforo.contador++;
+                semaforo.semAmarelo();
+                
+                if(semaforo.qntDeCiclos < 4  && semaforo.contador < 10){
+                    semaforo.flag = true;
+                    semaforo.qntDeCiclos = 0; 
+                } else {
+                    clearInterval(semaforo.intervalId);
+                    semaforo.flag = false;
+                }
+            }
+        };
+
+    </script>
+</body>
+</html>
